@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "polyskull.wrotu.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "wrotu.refmap.json",
+  "mixins": [
+    "MixinInternetMenu"
+  ],
+  "client": [
+    "MixinInternetScreen"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
