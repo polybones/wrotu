@@ -4,6 +4,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import polyskull.wrotu.Wrotu;
+import polyskull.wrotu.network.protocol.ShopPurchaseItemPacket;
+import polyskull.wrotu.network.protocol.ShopSyncPacket;
 
 public class PacketHandler {
     private static final String PROTOCOL_VERSION = "1";
@@ -19,6 +21,11 @@ public class PacketHandler {
                 .encoder(ShopSyncPacket::encoder)
                 .decoder(ShopSyncPacket::decoder)
                 .consumerMainThread(ShopSyncPacket::handle)
+                .add();
+        INSTANCE.messageBuilder(ShopPurchaseItemPacket.class, 1)
+                .encoder(ShopPurchaseItemPacket::encoder)
+                .decoder(ShopPurchaseItemPacket::decoder)
+                .consumerMainThread(ShopPurchaseItemPacket::handle)
                 .add();
     }
 }

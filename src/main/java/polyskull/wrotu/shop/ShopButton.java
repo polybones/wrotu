@@ -9,6 +9,7 @@ public class ShopButton extends Button {
 
     @Override
     public boolean isHoveredOrFocused() {
-        return (!this.isFocused() || this.isHovered()) && (this.isHovered() || this.isFocused());
+        return this.isHovered();
+        //return (!this.isFocused() || this.isHovered()) && (this.isHovered() || this.isFocused());
     }
 }

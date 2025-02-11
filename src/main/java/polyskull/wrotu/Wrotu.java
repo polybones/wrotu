@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import polyskull.wrotu.init.ModCreativeTabs;
 import polyskull.wrotu.network.PacketHandler;
-import polyskull.wrotu.network.ShopSyncPacket;
+import polyskull.wrotu.network.protocol.ShopSyncPacket;
 import polyskull.wrotu.shop.ShopManager;
 
 @Mod(Wrotu.MOD_ID)

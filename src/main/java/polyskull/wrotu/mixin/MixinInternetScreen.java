@@ -15,15 +15,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import polyskull.wrotu.Wrotu;
+import polyskull.wrotu.network.PacketHandler;
+import polyskull.wrotu.network.protocol.ShopPurchaseItemPacket;
 import polyskull.wrotu.shop.ClientShopManager;
 import polyskull.wrotu.shop.ShopButton;
 import polyskull.wrotu.shop.ShopEntry;
+import polyskull.wrotu.shop.ShopManager;
 
 import java.util.ArrayList;
 
@@ -33,8 +37,6 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
     @Unique
     private static final ResourceLocation BG_TEXTURE =
             new ResourceLocation(Wrotu.MOD_ID, "textures/screens/internet_screen.png");
-    @Unique
-    private static final ArrayList<ShopEntry> shoppingCart = new ArrayList<>();
     @Unique
     private static int shopIndex = 0;
 
@@ -114,7 +116,6 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
     private void wrotu$internetUiScreen$rewriteInit(CallbackInfo ci) {
         ci.cancel();
         super.init();
-        shopIndex = 0; // may remove later
 
         this.addRenderableWidget(new ShopButton(Button.builder(
                 Component.literal("<"), button -> {
@@ -137,8 +138,23 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
                         shopIndex = 0;
                     }
                 }).bounds(
-                        this.leftPos + 80, this.topPos + 46,
-                        12, 14)
+                this.leftPos + 80, this.topPos + 46,
+                12, 14)
+        ));
+        this.addRenderableWidget(new ShopButton(Button.builder(
+                Component.translatable("gui.wrotu.internetui.purchase_button"), button -> {
+                    final ShopEntry shopEntry = ClientShopManager.getEntry(shopIndex);
+                    if(this.minecraft != null && this.minecraft.player != null) {
+                        if(ShopManager.playerHasEnoughMoney(this.minecraft.player, shopEntry.cost())) {
+                            PacketHandler.INSTANCE.send(
+                                    PacketDistributor.SERVER.noArg(),
+                                    new ShopPurchaseItemPacket(shopIndex)
+                            );
+                        }
+                    }
+                }).bounds(
+                this.leftPos + 96, this.topPos + 46,
+                36, 14)
         ));
     }
 

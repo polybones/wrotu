@@ -1,15 +1,17 @@
 package polyskull.wrotu.shop;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import net.mcreator.wheat_death_of_the_universe.init.WheatdeathoftheuniverseModItems;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -51,5 +53,9 @@ public class ShopManager extends SimpleJsonResourceReloadListener {
 
     public ArrayList<ShopEntry> getEntries() {
         return VALUES;
+    }
+
+    public static boolean playerHasEnoughMoney(Player player, int cost) {
+        return player.getInventory().countItem(WheatdeathoftheuniverseModItems.DOLLARBILL.get()) >= cost;
     }
 }

@@ -1,7 +1,7 @@
 package polyskull.wrotu.shop;
 
 import net.minecraftforge.network.NetworkEvent;
-import polyskull.wrotu.network.ShopSyncPacket;
+import polyskull.wrotu.network.protocol.ShopSyncPacket;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;

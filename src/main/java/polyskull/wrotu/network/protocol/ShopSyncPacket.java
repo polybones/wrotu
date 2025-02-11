@@ -1,4 +1,4 @@
-package polyskull.wrotu.network;
+package polyskull.wrotu.network.protocol;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
