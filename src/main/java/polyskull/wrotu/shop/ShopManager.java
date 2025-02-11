@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.mcreator.wheat_death_of_the_universe.init.WheatdeathoftheuniverseModItems;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -42,8 +41,14 @@ public class ShopManager extends SimpleJsonResourceReloadListener {
     private static Optional<ShopEntry> parse(JsonObject json, ResourceLocation path) {
         try {
             final int cost = GsonHelper.getAsInt(json, "cost");
+            if(cost <= 0) {
+                throw new JsonSyntaxException("Invalid cost (cost must be greater than 0!)");
+            }
             final Item item = GsonHelper.getAsItem(json, "item");
             final int amount = GsonHelper.getAsInt(json, "amount");
+            if(amount < 1 || amount > 64) {
+                throw new JsonSyntaxException("Invalid amount (amount must be between 1-64!)");
+            }
             return Optional.of(new ShopEntry(new ItemStack(item, amount), cost));
         } catch(JsonSyntaxException ex) {
             Wrotu.LOGGER.warn("Error loading shop entry '{}': {}", path, ex.getMessage());
