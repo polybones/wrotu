@@ -50,7 +50,8 @@ public class ShopManager extends SimpleJsonResourceReloadListener {
                 throw new JsonSyntaxException("Invalid amount (amount must be between 1-64!)");
             }
             return Optional.of(new ShopEntry(new ItemStack(item, amount), cost));
-        } catch(JsonSyntaxException ex) {
+        }
+        catch(JsonSyntaxException ex) {
             Wrotu.LOGGER.warn("Error loading shop entry '{}': {}", path, ex.getMessage());
             return Optional.empty();
         }

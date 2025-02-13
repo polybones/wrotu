@@ -7,29 +7,26 @@ import net.mcreator.wheat_death_of_the_universe.world.inventory.Utilityinternetu
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import polyskull.wrotu.Wrotu;
+import polyskull.wrotu.init.ModSounds;
 import polyskull.wrotu.network.PacketHandler;
 import polyskull.wrotu.network.protocol.ShopPurchaseItemPacket;
 import polyskull.wrotu.shop.ClientShopManager;
 import polyskull.wrotu.shop.ShopButton;
 import polyskull.wrotu.shop.ShopEntry;
 import polyskull.wrotu.shop.ShopManager;
-
-import java.util.ArrayList;
 
 @SuppressWarnings("AddedMixinMembersNamePattern")
 @Mixin(UtilityinternetuiScreen.class)
@@ -38,7 +35,9 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
     private static final ResourceLocation BG_TEXTURE =
             new ResourceLocation(Wrotu.MOD_ID, "textures/screens/internet_screen.png");
     @Unique
-    private static int shopIndex = 0;
+    private static final int SPEED = 1000;
+    @Unique
+    private static final float SCALE = 3.0F;
 
     // Dummy constructor
     private MixinInternetScreen(UtilityinternetuiMenu p_97741_, Inventory p_97742_, Component p_97743_) {
@@ -49,7 +48,7 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
     private void wrotu$internetUiScreen$renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY, CallbackInfo ci) {
         ci.cancel();
 
-        final ShopEntry shopEntry = ClientShopManager.getEntry(shopIndex);
+        final ShopEntry shopEntry = ClientShopManager.getEntry();
         guiGraphics.drawString(
                 this.font,
                 shopEntry.itemStack().getHoverName(),
@@ -81,7 +80,7 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
             int p_283605_,
             int p_281879_,
             float p_282809_,
-            float p_282942_,
+            float p_282update942_,
             int p_281922_,
             int p_282385_,
             int p_282596_,
@@ -101,14 +100,11 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
                 this.imageWidth, this.imageHeight
         );
 
-        final ShopEntry shopEntry = ClientShopManager.getEntry(shopIndex);
-        renderSpinningItem(
-                shopEntry.itemStack(),
+        this.renderSpinningItem(
+                ClientShopManager.getEntry().itemStack(),
                 guiGraphics,
                 this.leftPos + 25,
-                this.topPos + 30,
-                1000,
-                3.0F
+                this.topPos + 30
         );
     }
 
@@ -119,36 +115,31 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
 
         this.addRenderableWidget(new ShopButton(Button.builder(
                 Component.literal("<"), button -> {
-                    if(shopIndex > 0) {
-                        shopIndex--;
-                    }
-                    else {
-                        shopIndex = ClientShopManager.getAllEntries().size() - 1;
-                    }
+                    ClientShopManager.prevItem();
                 }).bounds(
                 this.leftPos + 64, this.topPos + 46,
                 12, 14)
         ));
         this.addRenderableWidget(new ShopButton(Button.builder(
                 Component.literal(">"), button -> {
-                    if(shopIndex < ClientShopManager.getAllEntries().size() - 1) {
-                        shopIndex++;
-                    }
-                    else {
-                        shopIndex = 0;
-                    }
+                    ClientShopManager.nextItem();
                 }).bounds(
                 this.leftPos + 80, this.topPos + 46,
                 12, 14)
         ));
         this.addRenderableWidget(new ShopButton(Button.builder(
                 Component.translatable("gui.wrotu.internetui.purchase_button"), button -> {
-                    final ShopEntry shopEntry = ClientShopManager.getEntry(shopIndex);
-                    if(this.minecraft != null && this.minecraft.player != null) {
-                        if(ShopManager.playerHasEnoughMoney(this.minecraft.player, shopEntry.cost())) {
-                            PacketHandler.INSTANCE.send(
-                                    PacketDistributor.SERVER.noArg(),
-                                    new ShopPurchaseItemPacket(shopIndex)
+                    if(this.minecraft != null && this.minecraft.player != null && this.minecraft.level != null) {
+                        if(ShopManager.playerHasEnoughMoney(this.minecraft.player, ClientShopManager.getEntry().cost())) {
+                            PacketHandler.INSTANCE.sendToServer(
+                                    new ShopPurchaseItemPacket(ClientShopManager.getShopIndex()));
+                            this.minecraft.level.playLocalSound(
+                                    this.minecraft.player.blockPosition(),
+                                    ModSounds.BUY_ITEM_SUCCESS.get(),
+                                    SoundSource.PLAYERS,
+                                    1.0F,
+                                    1.0F,
+                                    false
                             );
                         }
                     }
@@ -159,20 +150,17 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
     }
 
     @Unique
-    private void renderSpinningItem(final ItemStack stack, GuiGraphics guiGraphics, double x, double y, long speed, float scale) {
+    private void renderSpinningItem(final ItemStack stack, GuiGraphics guiGraphics, double x, double y) {
         if(this.minecraft != null) {
-            final ItemRenderer itemRenderer = this.minecraft.getItemRenderer();
             final PoseStack poseStack = guiGraphics.pose();
-            final float angle = (float) (System.currentTimeMillis() % (360 * speed)) / speed;
-            // TODO: Cache baked models at datapack reload time
-            final BakedModel bakedmodel = itemRenderer.getModel(stack, this.minecraft.level, this.minecraft.player, 0);
+            final float angle = (float) (System.currentTimeMillis() % (360 * SPEED)) / SPEED;
 
             try {
                 poseStack.pushPose();
                 poseStack.translate((float) (x + 8), (float) (y + 8), 150.0F);
                 poseStack.mulPoseMatrix(
                         new Matrix4f()
-                                .scaling(scale, -scale, scale)
+                                .scaling(SCALE, -SCALE, SCALE)
                                 .rotateLocalY(angle)
                 );
                 poseStack.scale(16.0F, 16.0F, 16.0F);
@@ -185,11 +173,12 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
                         guiGraphics.bufferSource(),
                         15728880,
                         OverlayTexture.NO_OVERLAY,
-                        bakedmodel
+                        ClientShopManager.getCachedModel()
                 );
                 guiGraphics.flush();
-            } catch(Exception ignored) {
-                // TODO: Handle this probably
+            }
+            catch(Exception ex) {
+                Wrotu.LOGGER.error("Error rendering shop entry preview: {}", ex.getMessage());
             }
 
             poseStack.popPose();

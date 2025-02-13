@@ -3,8 +3,10 @@ package polyskull.wrotu.network.protocol;
 import net.mcreator.wheat_death_of_the_universe.init.WheatdeathoftheuniverseModItems;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
+import polyskull.wrotu.init.ModSounds;
 import polyskull.wrotu.shop.ShopEntry;
 import polyskull.wrotu.shop.ShopManager;
 
@@ -45,6 +47,12 @@ public record ShopPurchaseItemPacket(int shopIndex) {
                     i++;
                 }
                 sender.addItem(shopEntry.itemStack().copy());
+                sender.level().playSound(
+                        sender,
+                        sender.blockPosition(),
+                        ModSounds.BUY_ITEM_SUCCESS.get(),
+                        SoundSource.PLAYERS
+                );
             }
         });
         ctx.get().setPacketHandled(true);

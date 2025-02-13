@@ -7,7 +7,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,6 +19,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import polyskull.wrotu.init.ModCreativeTabs;
+import polyskull.wrotu.init.ModSounds;
 import polyskull.wrotu.network.PacketHandler;
 import polyskull.wrotu.network.protocol.ShopSyncPacket;
 import polyskull.wrotu.shop.ShopManager;
@@ -34,6 +34,7 @@ public class Wrotu {
 
         PacketHandler.register();
         ModCreativeTabs.register(modEventBus);
+        ModSounds.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
@@ -49,20 +50,21 @@ public class Wrotu {
         event.addListener(ShopManager.INSTANCE);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public void onDatapackSync(OnDatapackSyncEvent event) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new ShopSyncPacket(ShopManager.INSTANCE.getEntries()));
+        if(event.getPlayer() == null) {
+            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                    new ShopSyncPacket(ShopManager.INSTANCE.getEntries()));
+        }
     }
 
     @SubscribeEvent
     public void onPlayerJoinServer(PlayerEvent.PlayerLoggedInEvent event) {
         if(event.getEntity() instanceof ServerPlayer player) {
-            PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new ShopSyncPacket(ShopManager.INSTANCE.getEntries()));
+            PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
+                    new ShopSyncPacket(ShopManager.INSTANCE.getEntries()));
         }
     }
-
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {}
 
     @Mod.EventBusSubscriber(
             modid = MOD_ID,

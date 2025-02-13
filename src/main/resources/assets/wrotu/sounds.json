@@ -1,0 +1,6 @@
+{
+  "buy_item_success": {
+    "subtitle": "subtitles.wrotu.buy_item_success",
+    "sounds": ["wrotu:buy_item_success"]
+  }
+}
