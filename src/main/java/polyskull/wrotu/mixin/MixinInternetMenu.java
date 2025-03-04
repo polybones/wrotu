@@ -19,8 +19,6 @@ public abstract class MixinInternetMenu extends AbstractContainerMenu {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void wrotu$internetUiMenu$removeDefaultSlots(int id, Inventory inv, FriendlyByteBuf extraData, CallbackInfo ci) {
-        // yoink lol
-
         this.slots.subList(0, 16).clear();
         this.slots.forEach(slot -> slot.index -= 16);
     }

@@ -47,23 +47,44 @@ public class Wrotu {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void addReloadListeners(AddReloadListenerEvent event) {
         // event.addListener(ShopManager.INSTANCE);
-        // event.addListener(ModShops.PERSONAL_COMPUTER.getManager());
         ModShops.getShops().forEach(shop -> event.addListener(shop.getManager()));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onDatapackSync(OnDatapackSyncEvent event) {
         if(event.getPlayer() == null) {
+            /*
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new ShopSyncPacket(ShopManager.INSTANCE.getEntries()));
+             */
+            ModShops.getShops().forEach(shop -> {
+                PacketHandler.INSTANCE.send(
+                        PacketDistributor.ALL.noArg(),
+                        new ShopSyncPacket(
+                                shop.getClientManager().getId(),
+                                shop.getManager().getEntries()
+                        )
+                );
+            });
         }
     }
 
     @SubscribeEvent
     public void onPlayerJoinServer(PlayerEvent.PlayerLoggedInEvent event) {
         if(event.getEntity() instanceof ServerPlayer player) {
+            /*
             PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
                     new ShopSyncPacket(ShopManager.INSTANCE.getEntries()));
+             */
+            ModShops.getShops().forEach(shop -> {
+                PacketHandler.INSTANCE.send(
+                        PacketDistributor.PLAYER.with(() -> player),
+                        new ShopSyncPacket(
+                                shop.getClientManager().getId(),
+                                shop.getManager().getEntries()
+                        )
+                );
+            });
         }
     }
 

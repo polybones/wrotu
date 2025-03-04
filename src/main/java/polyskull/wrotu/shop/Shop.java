@@ -11,22 +11,31 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import polyskull.wrotu.Wrotu;
+import polyskull.wrotu.network.protocol.ShopSyncPacket;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class Shop {
     private final Manager manager;
+    private final ClientManager clientManager;
 
-    public Shop(String path) {
+    public Shop(String path, int id) {
         this.manager = new Manager(path);
+        this.clientManager = new ClientManager(id);
     }
 
     public Manager getManager() {
         return this.manager;
+    }
+
+    public ClientManager getClientManager() {
+        return this.clientManager;
     }
 
     public static class Manager extends SimpleJsonResourceReloadListener {
@@ -40,6 +49,10 @@ public class Shop {
             return this.entries;
         }
 
+        public Entry getEntry(int shopIndex) {
+            return this.entries.get(shopIndex);
+        }
+
         @Override
         protected void apply(Map<ResourceLocation, JsonElement> loaded, @NotNull ResourceManager manager, @NotNull ProfilerFiller profiler) {
             entries.clear();
@@ -48,7 +61,7 @@ public class Shop {
             Wrotu.LOGGER.info("Loaded {} shop entries", entries.size());
         }
 
-        private static Optional<Entry> parse(JsonObject json, ResourceLocation path) {
+        private Optional<Entry> parse(JsonObject json, ResourceLocation path) {
             try {
                 final int cost = GsonHelper.getAsInt(json, "cost");
                 if(cost <= 0) {
@@ -64,6 +77,56 @@ public class Shop {
             catch(JsonSyntaxException ex) {
                 Wrotu.LOGGER.warn("Error loading shop entry '{}': {}", path, ex.getMessage());
                 return Optional.empty();
+            }
+        }
+    }
+
+    public static class ClientManager {
+        private final int id;
+        private ArrayList<Entry> entries;
+        private int shopIndex = 0;
+
+        public ClientManager(int id) {
+            this.id = id;
+            this.entries = new ArrayList<>();
+        }
+
+        public int getId() {
+            return this.id;
+        }
+
+        @SuppressWarnings("unused")
+        public void handleClient(@NotNull ShopSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
+            this.entries = msg.entries();
+            final int newSize = this.entries.size() - 1;
+            if(shopIndex > newSize) {
+                shopIndex = newSize;
+            }
+        }
+
+        public Entry getEntry() {
+            return this.entries.get(shopIndex);
+        }
+
+        public int getShopIndex() {
+            return this.shopIndex;
+        }
+
+        public void nextItem() {
+            if(shopIndex < this.entries.size() - 1) {
+                shopIndex++;
+            }
+            else {
+                shopIndex = 0;
+            }
+        }
+
+        public void prevItem() {
+            if(this.shopIndex > 0) {
+                this.shopIndex--;
+            }
+            else {
+                this.shopIndex = this.entries.size() - 1;
             }
         }
     }

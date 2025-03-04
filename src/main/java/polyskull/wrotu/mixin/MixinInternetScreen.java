@@ -20,12 +20,12 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import polyskull.wrotu.Wrotu;
+import polyskull.wrotu.init.ModShops;
 import polyskull.wrotu.init.ModSounds;
 import polyskull.wrotu.network.PacketHandler;
 import polyskull.wrotu.network.protocol.ShopPurchaseItemPacket;
-import polyskull.wrotu.shop_legacy.ClientShopManager;
+import polyskull.wrotu.shop.Shop;
 import polyskull.wrotu.util.HoverButton;
-import polyskull.wrotu.shop_legacy.ShopEntry;
 import polyskull.wrotu.shop_legacy.ShopManager;
 
 @SuppressWarnings("AddedMixinMembersNamePattern")
@@ -48,10 +48,11 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
     private void wrotu$internetUiScreen$renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY, CallbackInfo ci) {
         ci.cancel();
 
-        final ShopEntry shopEntry = ClientShopManager.getEntry();
+        final Shop.Entry shopEntry = ModShops.PERSONAL_COMPUTER
+                .getClientManager().getEntry();
         guiGraphics.drawString(
                 this.font,
-                shopEntry.itemStack().getHoverName(),
+                shopEntry.stack().getHoverName(),
                 this.titleLabelX + 60,
                 this.titleLabelY + 10,
                 -1,
@@ -101,7 +102,7 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
         );
 
         this.renderSpinningItem(
-                ClientShopManager.getEntry().itemStack(),
+                ModShops.PERSONAL_COMPUTER.getClientManager().getEntry().stack(),
                 guiGraphics,
                 this.leftPos + 25,
                 this.topPos + 30
@@ -114,25 +115,25 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
         super.init();
 
         this.addRenderableWidget(new HoverButton(Button.builder(
-                Component.literal("<"), button -> {
-                    ClientShopManager.prevItem();
-                }).bounds(
+                Component.literal("<"), button ->
+                        ModShops.PERSONAL_COMPUTER.getClientManager().prevItem()).bounds(
                 this.leftPos + 64, this.topPos + 46,
                 12, 14)
         ));
         this.addRenderableWidget(new HoverButton(Button.builder(
-                Component.literal(">"), button -> {
-                    ClientShopManager.nextItem();
-                }).bounds(
+                Component.literal(">"), button ->
+                        ModShops.PERSONAL_COMPUTER.getClientManager().nextItem()).bounds(
                 this.leftPos + 80, this.topPos + 46,
                 12, 14)
         ));
         this.addRenderableWidget(new HoverButton(Button.builder(
                 Component.translatable("gui.wrotu.internetui.purchase_button"), button -> {
                     if(this.minecraft != null && this.minecraft.player != null && this.minecraft.level != null) {
-                        if(ShopManager.playerHasEnoughMoney(this.minecraft.player, ClientShopManager.getEntry().cost())) {
+                        final Shop pc = ModShops.PERSONAL_COMPUTER;
+                        final Shop.ClientManager clientManager = pc.getClientManager();
+                        if(ShopManager.playerHasEnoughMoney(this.minecraft.player, clientManager.getEntry().cost())) {
                             PacketHandler.INSTANCE.sendToServer(
-                                    new ShopPurchaseItemPacket(ClientShopManager.getShopIndex()));
+                                    new ShopPurchaseItemPacket(pc.getClientManager().getId(), clientManager.getShopIndex()));
                             this.minecraft.level.playLocalSound(
                                     this.minecraft.player.blockPosition(),
                                     ModSounds.BUY_ITEM_SUCCESS.get(),
@@ -173,7 +174,13 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
                         guiGraphics.bufferSource(),
                         15728880,
                         OverlayTexture.NO_OVERLAY,
-                        ClientShopManager.getCachedModel()
+                        // ClientShopManager.getCachedModel()
+                        this.minecraft.getItemRenderer().getModel(
+                                stack,
+                                this.minecraft.level,
+                                this.minecraft.player,
+                                0
+                        )
                 );
                 guiGraphics.flush();
             }

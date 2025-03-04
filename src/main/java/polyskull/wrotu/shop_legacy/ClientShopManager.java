@@ -17,7 +17,8 @@ public class ClientShopManager {
 
     @SuppressWarnings("unused")
     public static void handleClient(@NotNull ShopSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        SHOP_ENTRIES = msg.entries();
+        // SHOP_ENTRIES = msg.entries();
+        SHOP_ENTRIES = new ArrayList<>();
         final int newSize = SHOP_ENTRIES.size() - 1;
         if(shopIndex > newSize) {
             shopIndex = newSize;
