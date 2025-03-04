@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "wrotu.refmap.json",
   "mixins": [
-    "MixinInternetMenu"
+    "MixinInternetMenu",
+    "access.InventoryAccessor"
   ],
   "client": [
     "MixinInternetScreen"

@@ -1,4 +1,4 @@
-package polyskull.wrotu.shop;
+package polyskull.wrotu.shop_legacy;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

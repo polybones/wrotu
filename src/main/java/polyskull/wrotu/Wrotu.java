@@ -18,11 +18,11 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
-import polyskull.wrotu.init.ModCreativeTabs;
+import polyskull.wrotu.init.ModShops;
 import polyskull.wrotu.init.ModSounds;
 import polyskull.wrotu.network.PacketHandler;
 import polyskull.wrotu.network.protocol.ShopSyncPacket;
-import polyskull.wrotu.shop.ShopManager;
+import polyskull.wrotu.shop_legacy.ShopManager;
 
 @Mod(Wrotu.MOD_ID)
 public class Wrotu {
@@ -33,7 +33,6 @@ public class Wrotu {
         IEventBus modEventBus = context.getModEventBus();
 
         PacketHandler.register();
-        ModCreativeTabs.register(modEventBus);
         ModSounds.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
@@ -47,7 +46,9 @@ public class Wrotu {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void addReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(ShopManager.INSTANCE);
+        // event.addListener(ShopManager.INSTANCE);
+        // event.addListener(ModShops.PERSONAL_COMPUTER.getManager());
+        ModShops.getShops().forEach(shop -> event.addListener(shop.getManager()));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)

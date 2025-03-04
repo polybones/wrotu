@@ -7,8 +7,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import polyskull.wrotu.init.ModSounds;
-import polyskull.wrotu.shop.ShopEntry;
-import polyskull.wrotu.shop.ShopManager;
+import polyskull.wrotu.shop_legacy.ShopEntry;
+import polyskull.wrotu.shop_legacy.ShopManager;
 
 import java.util.function.Supplier;
 

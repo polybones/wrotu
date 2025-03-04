@@ -1,13 +1,10 @@
-package polyskull.wrotu.shop;
+package polyskull.wrotu.shop_legacy;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
-import polyskull.wrotu.network.PacketHandler;
-import polyskull.wrotu.network.protocol.ShopPurchaseItemPacket;
 import polyskull.wrotu.network.protocol.ShopSyncPacket;
 
 import java.util.ArrayList;

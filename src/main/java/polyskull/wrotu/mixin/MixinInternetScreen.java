@@ -23,10 +23,10 @@ import polyskull.wrotu.Wrotu;
 import polyskull.wrotu.init.ModSounds;
 import polyskull.wrotu.network.PacketHandler;
 import polyskull.wrotu.network.protocol.ShopPurchaseItemPacket;
-import polyskull.wrotu.shop.ClientShopManager;
-import polyskull.wrotu.shop.ShopButton;
-import polyskull.wrotu.shop.ShopEntry;
-import polyskull.wrotu.shop.ShopManager;
+import polyskull.wrotu.shop_legacy.ClientShopManager;
+import polyskull.wrotu.util.HoverButton;
+import polyskull.wrotu.shop_legacy.ShopEntry;
+import polyskull.wrotu.shop_legacy.ShopManager;
 
 @SuppressWarnings("AddedMixinMembersNamePattern")
 @Mixin(UtilityinternetuiScreen.class)
@@ -59,7 +59,7 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
         );
         guiGraphics.drawString(
                 this.font,
-                String.valueOf(shopEntry.cost()),
+                String.format("%,d", shopEntry.cost()),
                 this.titleLabelX + 76,
                 this.titleLabelY + 25,
                 -1,
@@ -113,21 +113,21 @@ public abstract class MixinInternetScreen extends AbstractContainerScreen<Utilit
         ci.cancel();
         super.init();
 
-        this.addRenderableWidget(new ShopButton(Button.builder(
+        this.addRenderableWidget(new HoverButton(Button.builder(
                 Component.literal("<"), button -> {
                     ClientShopManager.prevItem();
                 }).bounds(
                 this.leftPos + 64, this.topPos + 46,
                 12, 14)
         ));
-        this.addRenderableWidget(new ShopButton(Button.builder(
+        this.addRenderableWidget(new HoverButton(Button.builder(
                 Component.literal(">"), button -> {
                     ClientShopManager.nextItem();
                 }).bounds(
                 this.leftPos + 80, this.topPos + 46,
                 12, 14)
         ));
-        this.addRenderableWidget(new ShopButton(Button.builder(
+        this.addRenderableWidget(new HoverButton(Button.builder(
                 Component.translatable("gui.wrotu.internetui.purchase_button"), button -> {
                     if(this.minecraft != null && this.minecraft.player != null && this.minecraft.level != null) {
                         if(ShopManager.playerHasEnoughMoney(this.minecraft.player, ClientShopManager.getEntry().cost())) {

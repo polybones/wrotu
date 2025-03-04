@@ -5,8 +5,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import polyskull.wrotu.shop.ClientShopManager;
-import polyskull.wrotu.shop.ShopEntry;
+import polyskull.wrotu.shop_legacy.ClientShopManager;
+import polyskull.wrotu.shop_legacy.ShopEntry;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
