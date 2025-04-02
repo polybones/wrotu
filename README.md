@@ -1,3 +1,6 @@
+> [!CAUTION]
+> I have deprecated this mod. It *should* still work for newer WDOTU versions (in theory, as long as names of methods/fields/classes arent changed) I don't plan on updating this mod for the forseeable future.
+
 ## wrotu
 An addon for Wheat Death of the Universe (WDOTU)
 
